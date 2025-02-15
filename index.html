@@ -60,8 +60,7 @@
         const map = L.map('map').setView([11.1271, 78.6569], 7);
 
         // Add a beautiful terrain-style map theme using Thunderforest Outdoors
-        L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
-            attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
             maxZoom: 22
         }).addTo(map);
 
@@ -196,28 +195,20 @@
 
         // Apply filters
         function applyFilters() {
-            // Clear all markers
+            // First remove all marker groups from the map and clear them
             Object.values(markerGroups).forEach(group => {
+                map.removeLayer(group);
                 group.clearLayers();
             });
 
-            // Apply filters and add matching markers
+            // Get filtered treks
             const filteredTreks = filterTreks();
+
+            // Add markers for filtered treks
             filteredTreks.forEach(trek => {
-                const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty, ${trek.distance}km`);
-                const distance = trek.details.match(/Distance: (\d+)km/)[1];
-                const duration = trek.details.match(/Duration: ([\d.]+ Hours)/)[1];
-                const type = trek.details.match(/Type: ([^,]+)/)[1];
-                const price = trek.details.match(/Price: ([^}]+)/)[1];
-                const tooltipContent = `
-                    <strong>${trek.name}</strong><br>
-                    Difficulty: ${trek.difficulty}<br>
-                    Distance: ${distance}km<br>
-                    Duration: ${duration}<br>
-                    Type: ${type}<br>
-                    Price: ${price}<br>
-                    <a href="${trek.url}" target="_blank">Click for More Info</a>
-                `;
+                const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
+                const tooltipContent = `${trek.name} (${trek.difficulty})`;
+                
                 const marker = L.marker([trek.lat, trek.lng], { icon })
                     .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
                     .on('click', () => { window.open(trek.url, '_blank'); });
@@ -242,11 +233,9 @@
                 markerGroups[trek.difficulty].addLayer(marker);
             });
 
-            // Update the map with filtered markers
+            // Add all marker groups back to the map
             Object.values(markerGroups).forEach(group => {
-                if (!group.inactive) {
-                    map.addLayer(group);
-                }
+                map.addLayer(group);
             });
         }
 
