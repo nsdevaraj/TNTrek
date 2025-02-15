@@ -215,9 +215,11 @@
                     Duration: ${duration}<br>
                     Type: ${type}<br>
                     Price: ${price}<br>
-                    <a href="${trek.url}" target="_blank">More Info</a>
+                    <a href="${trek.url}" target="_blank">Click for More Info</a>
                 `;
-                const marker = L.marker([trek.lat, trek.lng], { icon }).bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'});
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
                 
                 const popupContent = `
                     <h3>${trek.name}</h3> 
@@ -267,7 +269,7 @@
             .then(treks => {
                 allTreks = treks;
                 treks.forEach(trek => {
-                    const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty, ${trek.distance}km`);
+                    const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
                     const distance = trek.details.match(/Distance: (\d+)km/)[1];
                 const duration = trek.details.match(/Duration: ([\d.]+ Hours)/)[1];
                 const type = trek.details.match(/Type: ([^,]+)/)[1];
@@ -279,9 +281,11 @@
                     Duration: ${duration}<br>
                     Type: ${type}<br>
                     Price: ${price}<br>
-                    <a href="${trek.url}" target="_blank">More Info</a>
+                    <a href="${trek.url}" target="_blank">Clck for More Info</a>
                 `;
-                const marker = L.marker([trek.lat, trek.lng], { icon }).bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'});
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
                     
                     const popupContent = `
                         <h3>${trek.name}</h3> 
