@@ -20,11 +20,11 @@
             </div>
         </div>
         <div class="filter-group">
-            <h4>Price (₹)</h4>
+            <h4>Price</h4>
             <div id="price-slider"></div>
             <div class="slider-values">
-                <span id="price-min">₹0</span>
-                <span id="price-max">₹4000</span>
+                <span id="price-min">0</span>
+                <span id="price-max">4000</span>
             </div>
         </div>
         <div class="filter-group">
@@ -119,7 +119,7 @@
                 const value = Math.round(values[handle]);
                 if (handle === 0) {
                     if (key === 'price') {
-                        minElement.textContent = `₹${value}`;
+                        minElement.textContent = `${value}`;
                     } else if (key === 'duration') {
                         minElement.textContent = `${value}h`;
                     } else {
@@ -127,7 +127,7 @@
                     }
                 } else {
                     if (key === 'price') {
-                        maxElement.textContent = `₹${value}`;
+                        maxElement.textContent = `${value}`;
                     } else if (key === 'duration') {
                         maxElement.textContent = `${value}h`;
                     } else {
@@ -157,18 +157,21 @@
         // Parse trek details
         function parseTrekDetails(details) {
             const parsed = {};
-            details.split(',').forEach(detail => {
-                const [key, value] = detail.trim().split(':').map(s => s.trim());
-                if (key === 'Distance') {
-                    parsed.distance = parseFloat(value.replace('km', ''));
-                } else if (key === 'Duration') {
-                    parsed.duration = parseFloat(value.replace('Hours', ''));
-                } else if (key === 'Price') {
-                    parsed.price = parseFloat(value.replace('₹', ''));
-                } else if (key === 'Type') {
-                    parsed.type = value.toLowerCase();
-                }
-            });
+            const distanceMatch = details.match(/Distance: (\d+)km/);
+            const durationMatch = details.match(/Duration: ([\d.]+) Hours/);
+            const priceMatch = details.match(/Price: ([^,]+)/);
+            const typeMatch = details.match(/Type: ([^,]+)/);
+
+            if (distanceMatch) parsed.distance = parseInt(distanceMatch[1]);
+            if (durationMatch) parsed.duration = parseFloat(durationMatch[1]);
+            if (priceMatch) {
+                // Extract numbers from price string, handling ₹ and commas
+                const priceStr = priceMatch[1].replace(/[^0-9]/g, '');
+                parsed.price = parseInt(priceStr) || 0;
+            }
+            if (typeMatch) parsed.type = typeMatch[1].trim().toLowerCase();
+
+            // console.log('Parsed price from:', priceMatch ? priceMatch[1] : 'no match', 'to:', parsed.price);
             return parsed;
         }
 
