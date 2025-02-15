@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="filters">
+    <button id="toggleFilters" class="filter-toggle-btn">
+        <span class="toggle-icon">/></span>
+    </button>
+    <div class="filters" id="filterPanel">
         <h3 style="margin-top: 0; margin-bottom: 20px;">Trek Filters</h3>
         <div class="filter-group">
             <h4>Distance (km)</h4>
@@ -46,6 +49,23 @@
                 </label>
             </div>
         </div>
+        <div class="filter-group">
+            <h4>Difficulty</h4>
+            <div class="difficulty-filter">
+                <label>
+                    <input type="checkbox" value="Easy" checked> Easy
+                    <span class="difficulty-marker" style="background: #2ecc71"></span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Moderate" checked> Moderate
+                    <span class="difficulty-marker" style="background: #f1c40f"></span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Tough" checked> Tough
+                    <span class="difficulty-marker" style="background: #e74c3c"></span>
+                </label>
+            </div>
+        </div>
         <button class="apply-filters" onclick="applyFilters()">Apply Filters</button>
         <button class="reset-filters" onclick="resetFilters()">Reset Filters</button>
     </div>
@@ -61,7 +81,8 @@
 
         // Add a beautiful terrain-style map theme using Thunderforest Outdoors
         L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
-            maxZoom: 22
+            maxZoom: 22,
+            attribution: 'Click on any location to book your trek',
         }).addTo(map);
 
         // Initialize variables
@@ -299,8 +320,8 @@
                     Duration: ${duration}<br>
                     Type: ${type}<br>
                     Price: ${price}<br>
-                    <a href="${trek.url}" target="_blank">Click for More Info</a>
                 `;
+                //<a href="${trek.url}" target="_blank">Click for More Info</a>
                 const marker = L.marker([trek.lat, trek.lng], { icon })
                     .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
                     .on('click', () => { window.open(trek.url, '_blank'); });
@@ -330,41 +351,29 @@
             })
             .catch(error => console.error('Error loading trek data:', error));
 
-        // Add interactive legend
-        const legend = L.control({ position: 'bottomright' });
-        legend.onAdd = () => {
-            const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = `
-                <h4>Trek Difficulty</h4>
-                ${Object.entries(difficultyColors).map(([difficulty, color]) => `
-                    <div class="legend-item" data-difficulty="${difficulty}">
-                        <span class="legend-marker" style="background-color: ${color}"></span>
-                        ${difficulty}
-                    </div>
-                `).join('')}
-            `;
+        // Add difficulty filter handlers
+        const difficultyCheckboxes = document.querySelectorAll('.difficulty-filter input[type="checkbox"]');
+        difficultyCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const difficulty = checkbox.value;
+                if (checkbox.checked) {
+                    markerGroups[difficulty].addTo(map);
+                } else {
+                    map.removeLayer(markerGroups[difficulty]);
+                }
+            });
+        });
 
-            // Add click handlers for legend items
-            setTimeout(() => {
-                const items = div.getElementsByClassName('legend-item');
-                Array.from(items).forEach(item => {
-                    item.addEventListener('click', () => {
-                        const difficulty = item.dataset.difficulty;
-                        item.classList.toggle('inactive');
-                        markerGroups[difficulty].inactive = item.classList.contains('inactive');
-                        
-                        if (markerGroups[difficulty].inactive) {
-                            map.removeLayer(markerGroups[difficulty]);
-                        } else {
-                            map.addLayer(markerGroups[difficulty]);
-                        }
-                    });
-                });
-            }, 0);
+        // Filter panel toggle functionality
+        const toggleBtn = document.getElementById('toggleFilters');
+        const filterPanel = document.getElementById('filterPanel');
+        let isPanelVisible = true;
 
-            return div;
-        };
-        legend.addTo(map);
+        toggleBtn.addEventListener('click', () => {
+            isPanelVisible = !isPanelVisible;
+            filterPanel.style.transform = isPanelVisible ? 'translateX(0)' : 'translateX(100%)';
+            toggleBtn.classList.toggle('panel-hidden');
+        });
     </script>
 </body>
 </html>
