@@ -65,49 +65,39 @@
             maxZoom: 22
         }).addTo(map);
 
-        // Create marker groups for each difficulty
+        // Initialize variables
+        let allTreks = [];
         const markerGroups = {
             'Easy': L.markerClusterGroup(),
             'Moderate': L.markerClusterGroup(),
             'Tough': L.markerClusterGroup()
         };
 
-        // Define marker colors for difficulties
         const difficultyColors = {
             'Easy': '#2ecc71',
             'Moderate': '#f1c40f',
             'Tough': '#e74c3c'
         };
 
-        // Store all treks and markers for filtering
-        let allTreks = [];
-        let activeMarkers = new Set();
-
-        // Initialize range sliders
+        // Initialize sliders
         const sliders = {
             distance: {
                 element: document.getElementById('distance-slider'),
                 min: 0,
                 max: 20,
-                start: [0, 20],
-                step: 1,
-                format: value => `${value} km`
+                start: [0, 20]
             },
             price: {
                 element: document.getElementById('price-slider'),
                 min: 0,
                 max: 4000,
-                start: [0, 4000],
-                step: 100,
-                format: value => `₹${value}`
+                start: [0, 4000]
             },
             duration: {
                 element: document.getElementById('duration-slider'),
                 min: 0,
                 max: 8,
-                start: [0, 8],
-                step: 0.5,
-                format: value => `${value}h`
+                start: [0, 8]
             }
         };
 
@@ -116,23 +106,34 @@
             noUiSlider.create(slider.element, {
                 start: slider.start,
                 connect: true,
-                step: slider.step,
                 range: {
                     'min': slider.min,
                     'max': slider.max
                 }
             });
 
-            // Update value displays
+            // Update the display values
             const minElement = document.getElementById(`${key}-min`);
             const maxElement = document.getElementById(`${key}-max`);
-            
+
             slider.element.noUiSlider.on('update', (values, handle) => {
-                const value = parseFloat(values[handle]);
+                const value = Math.round(values[handle]);
                 if (handle === 0) {
-                    minElement.textContent = slider.format(value);
+                    if (key === 'price') {
+                        minElement.textContent = `₹${value}`;
+                    } else if (key === 'duration') {
+                        minElement.textContent = `${value}h`;
+                    } else {
+                        minElement.textContent = `${value} km`;
+                    }
                 } else {
-                    maxElement.textContent = slider.format(value);
+                    if (key === 'price') {
+                        maxElement.textContent = `₹${value}`;
+                    } else if (key === 'duration') {
+                        maxElement.textContent = `${value}h`;
+                    } else {
+                        maxElement.textContent = `${value} km`;
+                    }
                 }
             });
         });
@@ -251,18 +252,43 @@
 
         // Reset filters
         function resetFilters() {
-            // Reset all sliders to their initial values
+            // Reset sliders to their initial values
             Object.entries(sliders).forEach(([key, slider]) => {
                 slider.element.noUiSlider.set(slider.start);
             });
 
-            // Reset checkboxes
-            document.querySelectorAll('.type-filter input').forEach(cb => cb.checked = true);
-            
-            // Apply the reset filters
-            applyFilters();
-        }
+            // Reset type checkboxes
+            document.querySelectorAll('.type-filter input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
 
+            // Clear all existing markers
+            Object.values(markerGroups).forEach(group => {
+                group.clearLayers();
+            });
+
+            // Re-add all treks with their markers
+            allTreks.forEach(trek => {
+                const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
+                const distance = trek.details.match(/Distance: (\d+)km/)[1];
+                const duration = trek.details.match(/Duration: ([\d.]+ Hours)/)[1];
+                const type = trek.details.match(/Type: ([^,]+)/)[1];
+                const price = trek.details.match(/Price: ([^}]+)/)[1];
+                const tooltipContent = `${trek.name} (${trek.difficulty})`;
+                
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
+                
+                markerGroups[trek.difficulty].addLayer(marker);
+            });
+
+            // Re-add all marker groups to the map
+            Object.values(markerGroups).forEach(group => {
+                map.addLayer(group);
+            });
+        }
+        
         // Fetch trek data from JSON file
         fetch('tracks.json')
             .then(response => response.json())
@@ -281,7 +307,7 @@
                     Duration: ${duration}<br>
                     Type: ${type}<br>
                     Price: ${price}<br>
-                    <a href="${trek.url}" target="_blank">Clck for More Info</a>
+                    <a href="${trek.url}" target="_blank">Click for More Info</a>
                 `;
                 const marker = L.marker([trek.lat, trek.lng], { icon })
                     .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
