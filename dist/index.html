@@ -3,148 +3,16 @@
 <head>
     <title>Tamil Nadu Trekking Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerClusterDefault.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css">
-    <style>
-        #map { 
-            height: 100vh; 
-            width: 100%; 
-        }
-        .leaflet-popup-content { 
-            min-width: 300px; 
-        }
-        .legend {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .legend h4 {
-            margin: 0 0 10px;
-            font-size: 14px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        .legend-item:hover {
-            background-color: #f0f0f0;
-        }
-        .legend-item.inactive {
-            opacity: 0.5;
-        }
-        .legend-marker {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-            display: inline-block;
-        }
-        .marker-cluster {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        .marker-cluster div {
-            background-color: rgba(41, 128, 185, 0.8);
-            color: white;
-            font-weight: bold;
-        }
-        .filters {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-        .filter-group {
-            margin-bottom: 25px;
-        }
-        .filter-group h4 {
-            margin: 0 0 15px;
-            font-size: 14px;
-            color: #333;
-        }
-        .type-filter {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .type-filter label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-        }
-        .apply-filters {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
-        }
-        .apply-filters:hover {
-            background-color: #1d4ed8;
-        }
-        .reset-filters {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-            transition: background-color 0.2s;
-        }
-        .reset-filters:hover {
-            background-color: #dc2626;
-        }
-        .slider-values {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #666;
-        }
-        /* Custom noUiSlider styling */
-        .noUi-connect {
-            background: #2563eb;
-        }
-        .noUi-handle {
-            border: 1px solid #2563eb;
-            background: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .noUi-handle:before,
-        .noUi-handle:after {
-            display: none;
-        }
-        .noUi-horizontal {
-            height: 8px;
-        }
-        .noUi-horizontal .noUi-handle {
-            width: 18px;
-            height: 18px;
-            right: -9px;
-            top: -5px;
-        }
-    </style>
+  <link rel="stylesheet" crossorigin href="/assets/main-D9iJkkiI.css">
 </head>
 <body>
-    <div class="filters">
+    <button id="toggleFilters" class="filter-toggle-btn">
+        <span class="toggle-icon">/></span>
+    </button>
+    <div class="filters" id="filterPanel">
         <h3 style="margin-top: 0; margin-bottom: 20px;">Trek Filters</h3>
         <div class="filter-group">
             <h4>Distance (km)</h4>
@@ -155,11 +23,11 @@
             </div>
         </div>
         <div class="filter-group">
-            <h4>Price (₹)</h4>
+            <h4>Price</h4>
             <div id="price-slider"></div>
             <div class="slider-values">
-                <span id="price-min">₹0</span>
-                <span id="price-max">₹4000</span>
+                <span id="price-min">0</span>
+                <span id="price-max">4000</span>
             </div>
         </div>
         <div class="filter-group">
@@ -181,6 +49,23 @@
                 </label>
             </div>
         </div>
+        <div class="filter-group">
+            <h4>Difficulty</h4>
+            <div class="difficulty-filter">
+                <label>
+                    <input type="checkbox" value="Easy" checked> Easy
+                    <span class="difficulty-marker" style="background: #2ecc71"></span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Moderate" checked> Moderate
+                    <span class="difficulty-marker" style="background: #f1c40f"></span>
+                </label>
+                <label>
+                    <input type="checkbox" value="Tough" checked> Tough
+                    <span class="difficulty-marker" style="background: #e74c3c"></span>
+                </label>
+            </div>
+        </div>
         <button class="apply-filters" onclick="applyFilters()">Apply Filters</button>
         <button class="reset-filters" onclick="resetFilters()">Reset Filters</button>
     </div>
@@ -195,54 +80,44 @@
         const map = L.map('map').setView([11.1271, 78.6569], 7);
 
         // Add a beautiful terrain-style map theme using Thunderforest Outdoors
-        L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
-            attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 22
+        L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
+            maxZoom: 22,
+            attribution: 'Click on any location to book your trek',
         }).addTo(map);
 
-        // Create marker groups for each difficulty
+        // Initialize variables
+        let allTreks = [];
         const markerGroups = {
             'Easy': L.markerClusterGroup(),
             'Moderate': L.markerClusterGroup(),
             'Tough': L.markerClusterGroup()
         };
 
-        // Define marker colors for difficulties
         const difficultyColors = {
             'Easy': '#2ecc71',
             'Moderate': '#f1c40f',
             'Tough': '#e74c3c'
         };
 
-        // Store all treks and markers for filtering
-        let allTreks = [];
-        let activeMarkers = new Set();
-
-        // Initialize range sliders
+        // Initialize sliders
         const sliders = {
             distance: {
                 element: document.getElementById('distance-slider'),
                 min: 0,
                 max: 20,
-                start: [0, 20],
-                step: 1,
-                format: value => `${value} km`
+                start: [0, 20]
             },
             price: {
                 element: document.getElementById('price-slider'),
                 min: 0,
                 max: 4000,
-                start: [0, 4000],
-                step: 100,
-                format: value => `₹${value}`
+                start: [0, 4000]
             },
             duration: {
                 element: document.getElementById('duration-slider'),
                 min: 0,
                 max: 8,
-                start: [0, 8],
-                step: 0.5,
-                format: value => `${value}h`
+                start: [0, 8]
             }
         };
 
@@ -251,29 +126,40 @@
             noUiSlider.create(slider.element, {
                 start: slider.start,
                 connect: true,
-                step: slider.step,
                 range: {
                     'min': slider.min,
                     'max': slider.max
                 }
             });
 
-            // Update value displays
+            // Update the display values
             const minElement = document.getElementById(`${key}-min`);
             const maxElement = document.getElementById(`${key}-max`);
-            
+
             slider.element.noUiSlider.on('update', (values, handle) => {
-                const value = parseFloat(values[handle]);
+                const value = Math.round(values[handle]);
                 if (handle === 0) {
-                    minElement.textContent = slider.format(value);
+                    if (key === 'price') {
+                        minElement.textContent = `${value}`;
+                    } else if (key === 'duration') {
+                        minElement.textContent = `${value}h`;
+                    } else {
+                        minElement.textContent = `${value} km`;
+                    }
                 } else {
-                    maxElement.textContent = slider.format(value);
+                    if (key === 'price') {
+                        maxElement.textContent = `${value}`;
+                    } else if (key === 'duration') {
+                        maxElement.textContent = `${value}h`;
+                    } else {
+                        maxElement.textContent = `${value} km`;
+                    }
                 }
             });
         });
 
         // Create custom marker icons
-        function createMarkerIcon(color) {
+        function createMarkerIcon(color, details) {
             return L.divIcon({
                 html: `<div style="
                     background-color: ${color};
@@ -282,7 +168,8 @@
                     border-radius: 50%;
                     border: 2px solid white;
                     box-shadow: 0 0 4px rgba(0,0,0,0.4);
-                "></div>`,
+                    cursor: pointer;
+                " title="${details}"></div>`,
                 className: 'custom-marker',
                 iconSize: [16, 16]
             });
@@ -291,18 +178,21 @@
         // Parse trek details
         function parseTrekDetails(details) {
             const parsed = {};
-            details.split(',').forEach(detail => {
-                const [key, value] = detail.trim().split(':').map(s => s.trim());
-                if (key === 'Distance') {
-                    parsed.distance = parseFloat(value.replace('km', ''));
-                } else if (key === 'Duration') {
-                    parsed.duration = parseFloat(value.replace('Hours', ''));
-                } else if (key === 'Price') {
-                    parsed.price = parseFloat(value.replace('₹', ''));
-                } else if (key === 'Type') {
-                    parsed.type = value.toLowerCase();
-                }
-            });
+            const distanceMatch = details.match(/Distance: (\d+)km/);
+            const durationMatch = details.match(/Duration: ([\d.]+) Hours/);
+            const priceMatch = details.match(/Price: ([^,]+)/);
+            const typeMatch = details.match(/Type: ([^,]+)/);
+
+            if (distanceMatch) parsed.distance = parseInt(distanceMatch[1]);
+            if (durationMatch) parsed.duration = parseFloat(durationMatch[1]);
+            if (priceMatch) {
+                // Extract numbers from price string, handling ₹ and commas
+                const priceStr = priceMatch[1].replace(/[^0-9]/g, '');
+                parsed.price = parseInt(priceStr) || 0;
+            }
+            if (typeMatch) parsed.type = typeMatch[1].trim().toLowerCase();
+
+            // console.log('Parsed price from:', priceMatch ? priceMatch[1] : 'no match', 'to:', parsed.price);
             return parsed;
         }
 
@@ -329,16 +219,23 @@
 
         // Apply filters
         function applyFilters() {
-            // Clear all markers
+            // First remove all marker groups from the map and clear them
             Object.values(markerGroups).forEach(group => {
+                map.removeLayer(group);
                 group.clearLayers();
             });
 
-            // Apply filters and add matching markers
+            // Get filtered treks
             const filteredTreks = filterTreks();
+
+            // Add markers for filtered treks
             filteredTreks.forEach(trek => {
-                const icon = createMarkerIcon(difficultyColors[trek.difficulty]);
-                const marker = L.marker([trek.lat, trek.lng], { icon });
+                const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
+                const tooltipContent = `${trek.name} (${trek.difficulty})`;
+                
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
                 
                 const popupContent = `
                     <h3>${trek.name}</h3> 
@@ -360,36 +257,74 @@
                 markerGroups[trek.difficulty].addLayer(marker);
             });
 
-            // Update the map with filtered markers
+            // Add all marker groups back to the map
             Object.values(markerGroups).forEach(group => {
-                if (!group.inactive) {
-                    map.addLayer(group);
-                }
+                map.addLayer(group);
             });
         }
 
         // Reset filters
         function resetFilters() {
-            // Reset all sliders to their initial values
+            // Reset sliders to their initial values
             Object.entries(sliders).forEach(([key, slider]) => {
                 slider.element.noUiSlider.set(slider.start);
             });
 
-            // Reset checkboxes
-            document.querySelectorAll('.type-filter input').forEach(cb => cb.checked = true);
-            
-            // Apply the reset filters
-            applyFilters();
-        }
+            // Reset type checkboxes
+            document.querySelectorAll('.type-filter input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
 
+            // Clear all existing markers
+            Object.values(markerGroups).forEach(group => {
+                group.clearLayers();
+            });
+
+            // Re-add all treks with their markers
+            allTreks.forEach(trek => {
+                const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
+                const distance = trek.details.match(/Distance: (\d+)km/)[1];
+                const duration = trek.details.match(/Duration: ([\d.]+ Hours)/)[1];
+                const type = trek.details.match(/Type: ([^,]+)/)[1];
+                const price = trek.details.match(/Price: ([^}]+)/)[1];
+                const tooltipContent = `${trek.name} (${trek.difficulty})`;
+                
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
+                
+                markerGroups[trek.difficulty].addLayer(marker);
+            });
+
+            // Re-add all marker groups to the map
+            Object.values(markerGroups).forEach(group => {
+                map.addLayer(group);
+            });
+        }
+        
         // Fetch trek data from JSON file
         fetch('tracks.json')
             .then(response => response.json())
             .then(treks => {
                 allTreks = treks;
                 treks.forEach(trek => {
-                    const icon = createMarkerIcon(difficultyColors[trek.difficulty]);
-                    const marker = L.marker([trek.lat, trek.lng], { icon });
+                    const icon = createMarkerIcon(difficultyColors[trek.difficulty], `${trek.name} - ${trek.difficulty} difficulty`);
+                    const distance = trek.details.match(/Distance: (\d+)km/)[1];
+                const duration = trek.details.match(/Duration: ([\d.]+ Hours)/)[1];
+                const type = trek.details.match(/Type: ([^,]+)/)[1];
+                const price = trek.details.match(/Price: ([^}]+)/)[1];
+                const tooltipContent = `
+                    <strong>${trek.name}</strong><br>
+                    Difficulty: ${trek.difficulty}<br>
+                    Distance: ${distance}km<br>
+                    Duration: ${duration}<br>
+                    Type: ${type}<br>
+                    Price: ${price}<br>
+                `;
+                //<a href="${trek.url}" target="_blank">Click for More Info</a>
+                const marker = L.marker([trek.lat, trek.lng], { icon })
+                    .bindTooltip(tooltipContent, {permanent: false, direction: 'top', className: 'trek-tooltip'})
+                    .on('click', () => { window.open(trek.url, '_blank'); });
                     
                     const popupContent = `
                         <h3>${trek.name}</h3> 
@@ -416,41 +351,29 @@
             })
             .catch(error => console.error('Error loading trek data:', error));
 
-        // Add interactive legend
-        const legend = L.control({ position: 'bottomright' });
-        legend.onAdd = () => {
-            const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = `
-                <h4>Trek Difficulty</h4>
-                ${Object.entries(difficultyColors).map(([difficulty, color]) => `
-                    <div class="legend-item" data-difficulty="${difficulty}">
-                        <span class="legend-marker" style="background-color: ${color}"></span>
-                        ${difficulty}
-                    </div>
-                `).join('')}
-            `;
+        // Add difficulty filter handlers
+        const difficultyCheckboxes = document.querySelectorAll('.difficulty-filter input[type="checkbox"]');
+        difficultyCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const difficulty = checkbox.value;
+                if (checkbox.checked) {
+                    markerGroups[difficulty].addTo(map);
+                } else {
+                    map.removeLayer(markerGroups[difficulty]);
+                }
+            });
+        });
 
-            // Add click handlers for legend items
-            setTimeout(() => {
-                const items = div.getElementsByClassName('legend-item');
-                Array.from(items).forEach(item => {
-                    item.addEventListener('click', () => {
-                        const difficulty = item.dataset.difficulty;
-                        item.classList.toggle('inactive');
-                        markerGroups[difficulty].inactive = item.classList.contains('inactive');
-                        
-                        if (markerGroups[difficulty].inactive) {
-                            map.removeLayer(markerGroups[difficulty]);
-                        } else {
-                            map.addLayer(markerGroups[difficulty]);
-                        }
-                    });
-                });
-            }, 0);
+        // Filter panel toggle functionality
+        const toggleBtn = document.getElementById('toggleFilters');
+        const filterPanel = document.getElementById('filterPanel');
+        let isPanelVisible = true;
 
-            return div;
-        };
-        legend.addTo(map);
+        toggleBtn.addEventListener('click', () => {
+            isPanelVisible = !isPanelVisible;
+            filterPanel.style.transform = isPanelVisible ? 'translateX(0)' : 'translateX(100%)';
+            toggleBtn.classList.toggle('panel-hidden');
+        });
     </script>
 </body>
 </html>
